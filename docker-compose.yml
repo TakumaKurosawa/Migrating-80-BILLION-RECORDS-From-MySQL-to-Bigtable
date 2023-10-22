@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:8.0.32
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_DATABASE: local
+      MYSQL_ROOT_PASSWORD: local-pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - "./init.sql:/docker-entrypoint-initdb.d/init.sql"
+
+  dynamodb:
+    command: "-jar DynamoDBLocal.jar -sharedDb"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb
+    ports:
+      - "8000:8000"
