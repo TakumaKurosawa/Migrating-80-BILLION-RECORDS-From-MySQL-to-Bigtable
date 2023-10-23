@@ -4,6 +4,8 @@
 
 ### 実行結果
 
+※実際にDynamoDBにインサートするのではなく、 `time.Sleep()` を用いて1msかかるものとしています。
+
 ```shell
 -------- Start migration --------
 shard-1 is started!!
@@ -12,14 +14,12 @@ shard-3 is started!!
 shard-4 is started!!
 shard-5 is started!!
 shard-6 is started!!
-shard-3 is done!
-shard-6 is done!
+shard-2 is done!
 shard-4 is done!
 shard-5 is done!
+shard-6 is done!
+shard-3 is done!
 shard-1 is done!
-shard-2 is done!
 -------- Finish migration --------
-Migration took 48.848333s
-
-
+Migration took 5.937700958s
 ```
