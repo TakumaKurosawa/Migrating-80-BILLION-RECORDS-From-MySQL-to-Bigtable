@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
-	"time"
 )
 
 const (
@@ -34,31 +35,12 @@ func main() {
 	fmt.Println("-------- Start migration --------")
 
 	for i := 1; i <= shardCount; i++ {
-		fmt.Printf("shard-%d...", i)
+		fmt.Printf("shard-%d...\n", i)
+		if err := migration(ctx, db, dynamoDB, fmt.Sprintf("hashdb-%d", i), querySize); err != nil {
+			log.Println(err)
 
-		var lastHash string
-		for {
-			var records []*Record
-			records, recordLeft, err := getRecordsFromMySQL(db, fmt.Sprintf("hashdb-%d", i), lastHash, querySize)
-			if err != nil {
-				log.Println(err)
-
-				return
-			}
-
-			if err := insertToDynamo(ctx, dynamoDB, records); err != nil {
-				log.Println(err)
-
-				return
-			}
-
-			lastHash = records[len(records)-1].Hash
-
-			if !recordLeft {
-				break
-			}
+			return
 		}
-
 		fmt.Println("done!")
 	}
 

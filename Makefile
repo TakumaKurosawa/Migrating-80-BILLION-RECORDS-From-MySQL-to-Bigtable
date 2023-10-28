@@ -1,5 +1,10 @@
 .DEFAULT_GOAL := help
 
+##### Go benchmark test #####
+
+.PHONY: bench/basic-migration
+bench/basic-migration: ## benchmark test for basic-migration ## make bench/basic-migration
+	cd basic-migration && go test -bench . -benchmem -benchtime 6x
 
 ##### HELP #####
 

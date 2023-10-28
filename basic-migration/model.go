@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
@@ -13,6 +14,29 @@ type Record struct {
 	URL     string
 	Login   bool
 	Created int64
+}
+
+func migration(ctx context.Context, db *gorm.DB, dynamoDB *dynamodb.Client, table string, querySize int) error {
+	var lastHash string
+	for {
+		var records []*Record
+		records, recordLeft, err := getRecordsFromMySQL(db, table, lastHash, querySize)
+		if err != nil {
+			return err
+		}
+
+		if err := insertToDynamo(ctx, dynamoDB, records); err != nil {
+			return err
+		}
+
+		lastHash = records[len(records)-1].Hash
+
+		if !recordLeft {
+			break
+		}
+	}
+
+	return nil
 }
 
 func getRecordsFromMySQL(db *gorm.DB, table, lastHash string, limit int) ([]*Record, bool, error) {
