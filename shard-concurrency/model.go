@@ -93,7 +93,7 @@ func somethingHeavyTransaction() (*res, error) {
 	//	return nil, err
 	//}
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(1 * time.Millisecond)
 
 	return &res{
 		ID:    rand.Intn(20),

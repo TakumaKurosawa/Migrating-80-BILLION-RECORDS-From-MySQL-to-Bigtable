@@ -2,16 +2,15 @@
 
 シャードごとに逐次実行するマイグレーションのサンプルです。
 
+**※DynamoDBへのインサート部分は `time.Sleep()` を使って擬似的に処理時間を稼いでいます。**
+
 ### 実行結果
 
 ```shell
--------- Start migration --------
-shard-1...done!
-shard-2...done!
-shard-3...done!
-shard-4...done!
-shard-5...done!
-shard-6...done!
--------- Finish migration --------
-Migration took 1m8.966566667s
+goos: darwin
+goarch: arm64
+pkg: github.com/TakumaKurosawa/basic-migration
+BenchmarkMigration-8   	       6	12258417403 ns/op	 3650237 B/op	  130123 allocs/op
+PASS
+ok  	github.com/TakumaKurosawa/basic-migration	86.400s
 ```
