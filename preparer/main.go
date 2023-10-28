@@ -16,7 +16,7 @@ import (
 
 const (
 	shardCount          = 6
-	recordCountPerShard = 1000
+	recordCountPerShard = 10000
 )
 
 func main() {
