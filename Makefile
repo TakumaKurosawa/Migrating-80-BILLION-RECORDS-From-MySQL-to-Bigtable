@@ -1,5 +1,12 @@
 .DEFAULT_GOAL := help
 
+##### Setup #####
+
+.PHONY: setup
+setup: ## setup for test ## make setup
+	docker compose up -d
+	make data/prepare
+
 ##### Data prepare #####
 
 .PHONY: data/prepare
