@@ -12,6 +12,10 @@ data/prepare: ## prepare data for test ## make data/prepare
 bench/basic-migration: ## benchmark test for basic-migration ## make bench/basic-migration
 	cd basic-migration && go test -bench . -benchmem -benchtime 6x
 
+.PHONY: bench/shard-concurrency
+bench/shard-concurrency: ## benchmark test for shard-concurrency ## make bench/shard-concurrency
+	cd shard-concurrency && go test -bench . -benchmem -benchtime 6x
+
 ##### HELP #####
 
 .PHONY: help
