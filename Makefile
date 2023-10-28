@@ -20,6 +20,14 @@ bench/shard-concurrency: ## benchmark test for shard-concurrency ## make bench/s
 bench/worker-pattern: ## benchmark test for worker-pattern ## make bench/worker-pattern
 	cd worker-pattern && go test -bench . -benchmem -benchtime 6x
 
+.PHONY: bench/all
+bench/all: ## benchmark test for all ## make bench/all
+	make bench/basic-migration
+	@echo ""
+	make bench/shard-concurrency
+	@echo ""
+	make bench/worker-pattern
+
 ##### HELP #####
 
 .PHONY: help
