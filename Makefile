@@ -1,5 +1,11 @@
 .DEFAULT_GOAL := help
 
+##### Data prepare #####
+
+.PHONY: data/prepare
+data/prepare: ## prepare data for test ## make data/prepare
+	cd preparer && go run main.go model.go
+
 ##### Go benchmark test #####
 
 .PHONY: bench/basic-migration
