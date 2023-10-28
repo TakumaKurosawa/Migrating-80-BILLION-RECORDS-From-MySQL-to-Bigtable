@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"testing"
 
 	"golang.org/x/sync/errgroup"
@@ -22,6 +21,7 @@ func BenchmarkMigration(b *testing.B) {
 
 	eg, egCtx := errgroup.WithContext(ctx)
 
+	b.ResetTimer()
 	for i := 1; i <= b.N; i++ {
 		table := fmt.Sprintf("hashdb-%d", i)
 
@@ -35,7 +35,7 @@ func BenchmarkMigration(b *testing.B) {
 	}
 
 	if err := eg.Wait(); err != nil {
-		log.Println(err)
+		b.Error(err)
 
 		return
 	}

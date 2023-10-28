@@ -21,6 +21,7 @@ func BenchmarkMigration(b *testing.B) {
 
 	eg, egCtx := errgroup.WithContext(ctx)
 
+	b.ResetTimer()
 	for i := 1; i <= b.N; i++ {
 		table := fmt.Sprintf("hashdb-%d", i)
 

@@ -17,6 +17,7 @@ func BenchmarkMigration(b *testing.B) {
 		return
 	}
 
+	b.ResetTimer()
 	for i := 1; i <= b.N; i++ {
 		if err := migration(ctx, db, dynamoDB, fmt.Sprintf("hashdb-%d", i), querySize); err != nil {
 			b.Error(err)
