@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"golang.org/x/sync/errgroup"
@@ -22,19 +21,17 @@ type Record struct {
 }
 
 const (
-	workerLimit = 100
+	workerLimit = 10
 	channelSize = 200
 )
 
 func migration(ctx context.Context, db *gorm.DB, dynamoDB *dynamodb.Client, table string, querySize int) error {
 	insertChan := make(chan *Record, channelSize)
-	workerEg, workerCtx := errgroup.WithContext(ctx)
+	workerEg, ctx := errgroup.WithContext(ctx)
 
 	for i := 1; i <= workerLimit; i++ {
-		fmt.Printf("Worker-%d is started!!\n", i)
-
 		workerEg.Go(func() error {
-			if err := insertToDynamo(workerCtx, dynamoDB, insertChan); err != nil {
+			if err := insertToDynamo(ctx, dynamoDB, insertChan); err != nil {
 				return err
 			}
 

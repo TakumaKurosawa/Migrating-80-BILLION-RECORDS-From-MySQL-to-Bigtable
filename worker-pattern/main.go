@@ -36,14 +36,14 @@ func main() {
 
 	fmt.Println("-------- Start migration --------")
 
-	eg, egCtx := errgroup.WithContext(ctx)
+	eg, ctx := errgroup.WithContext(ctx)
 
 	for i := 1; i <= shardCount; i++ {
 		table := fmt.Sprintf("hashdb-%d", i)
 		fmt.Printf("%s is started!!\n", table)
 
 		eg.Go(func() error {
-			if err := migration(egCtx, db, dynamoDB, table, querySize); err != nil {
+			if err := migration(ctx, db, dynamoDB, table, querySize); err != nil {
 				return err
 			}
 

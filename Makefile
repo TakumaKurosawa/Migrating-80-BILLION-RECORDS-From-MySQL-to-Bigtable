@@ -16,6 +16,10 @@ bench/basic-migration: ## benchmark test for basic-migration ## make bench/basic
 bench/shard-concurrency: ## benchmark test for shard-concurrency ## make bench/shard-concurrency
 	cd shard-concurrency && go test -bench . -benchmem -benchtime 6x
 
+.PHONY: bench/worker-pattern
+bench/worker-pattern: ## benchmark test for worker-pattern ## make bench/worker-pattern
+	cd worker-pattern && go test -bench . -benchmem -benchtime 6x
+
 ##### HELP #####
 
 .PHONY: help
