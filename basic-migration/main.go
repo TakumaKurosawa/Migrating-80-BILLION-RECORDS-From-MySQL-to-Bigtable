@@ -35,8 +35,9 @@ func main() {
 	fmt.Println("-------- Start migration --------")
 
 	for i := 1; i <= shardCount; i++ {
-		fmt.Printf("shard-%d...\n", i)
-		if err := migration(ctx, db, dynamoDB, fmt.Sprintf("hashdb-%d", i), querySize); err != nil {
+		table := fmt.Sprintf("hashdb-%d", i)
+		fmt.Printf("%s...", table)
+		if err := migration(ctx, db, dynamoDB, table, querySize); err != nil {
 			log.Println(err)
 
 			return

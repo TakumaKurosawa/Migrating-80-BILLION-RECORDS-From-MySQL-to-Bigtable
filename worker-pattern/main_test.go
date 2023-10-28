@@ -19,14 +19,14 @@ func BenchmarkMigration(b *testing.B) {
 		return
 	}
 
-	eg, egCtx := errgroup.WithContext(ctx)
+	eg, ctx := errgroup.WithContext(ctx)
 
 	b.ResetTimer()
 	for i := 1; i <= b.N; i++ {
 		table := fmt.Sprintf("hashdb-%d", i)
 
 		eg.Go(func() error {
-			if err := migration(egCtx, db, dynamoDB, table, querySize); err != nil {
+			if err := migration(ctx, db, dynamoDB, table, querySize); err != nil {
 				return err
 			}
 
