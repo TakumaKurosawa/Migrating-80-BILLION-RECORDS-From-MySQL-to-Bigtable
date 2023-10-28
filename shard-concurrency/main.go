@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"sync"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
@@ -35,42 +36,27 @@ func main() {
 
 	fmt.Println("-------- Start migration --------")
 
-	var shardWaitGroup sync.WaitGroup
+	eg, egCtx := errgroup.WithContext(ctx)
+
 	for i := 1; i <= shardCount; i++ {
-		fmt.Printf("shard-%d is started!!\n", i)
+		table := fmt.Sprintf("hashdb-%d", i)
+		fmt.Printf("%s is starting!!\n", table)
 
-		shardWaitGroup.Add(1)
-
-		go func(i int) {
-			var lastHash string
-			for {
-				var records []*Record
-				records, recordLeft, err := getRecordsFromMySQL(db, fmt.Sprintf("hashdb-%d", i), lastHash, querySize)
-				if err != nil {
-					log.Println(err)
-
-					return
-				}
-
-				if err := insertToDynamo(ctx, dynamoDB, records); err != nil {
-					log.Println(err)
-
-					return
-				}
-
-				lastHash = records[len(records)-1].Hash
-
-				if !recordLeft {
-					fmt.Printf("shard-%d is done!\n", i)
-					shardWaitGroup.Done()
-
-					break
-				}
+		eg.Go(func() error {
+			if err := migration(egCtx, db, dynamoDB, table); err != nil {
+				return err
 			}
-		}(i)
+
+			return nil
+		})
+
 	}
 
-	shardWaitGroup.Wait()
+	if err := eg.Wait(); err != nil {
+		log.Println(err)
+
+		return
+	}
 
 	fmt.Println("-------- Finish migration --------")
 	fmt.Printf("Migration took %s\n", time.Since(startTime))
