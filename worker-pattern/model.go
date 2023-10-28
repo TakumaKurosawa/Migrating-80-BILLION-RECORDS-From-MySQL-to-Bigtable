@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"sync"
-	"time"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -26,21 +26,20 @@ const (
 	channelSize = 200
 )
 
-func migrateRecordsForShard(ctx context.Context, db *gorm.DB, dynamoDB *dynamodb.Client, table string, querySize int, shardWG *sync.WaitGroup) {
-	defer shardWG.Done()
-
+func migration(ctx context.Context, db *gorm.DB, dynamoDB *dynamodb.Client, table string, querySize int) error {
 	insertChan := make(chan *Record, channelSize)
-	var workerWg sync.WaitGroup
-	for i := 0; i < workerLimit; i++ {
-		workerWg.Add(1)
-		fmt.Printf("Worker-%d is started!!\n", i)
-		go func() {
-			if err := insertToDynamo(ctx, dynamoDB, insertChan, &workerWg); err != nil {
-				log.Println(err)
+	workerEg, workerCtx := errgroup.WithContext(ctx)
 
-				return
+	for i := 1; i <= workerLimit; i++ {
+		fmt.Printf("Worker-%d is started!!\n", i)
+
+		workerEg.Go(func() error {
+			if err := insertToDynamo(workerCtx, dynamoDB, insertChan); err != nil {
+				return err
 			}
-		}()
+
+			return nil
+		})
 	}
 
 	var lastHash string
@@ -49,7 +48,7 @@ func migrateRecordsForShard(ctx context.Context, db *gorm.DB, dynamoDB *dynamodb
 		if err != nil {
 			log.Println(err)
 
-			return
+			return err
 		}
 
 		for _, record := range records {
@@ -64,8 +63,12 @@ func migrateRecordsForShard(ctx context.Context, db *gorm.DB, dynamoDB *dynamodb
 	}
 
 	close(insertChan)
-	workerWg.Wait()
-	fmt.Printf("%s is done!\n", table)
+
+	if err := workerEg.Wait(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func getRecordsFromMySQL(db *gorm.DB, table, lastHash string, limit int) ([]*Record, bool, error) {
@@ -77,11 +80,8 @@ func getRecordsFromMySQL(db *gorm.DB, table, lastHash string, limit int) ([]*Rec
 	return records, len(records) < limit, nil
 }
 
-func insertToDynamo(ctx context.Context, db *dynamodb.Client, insertChan <-chan *Record, workerWg *sync.WaitGroup) error {
-	defer workerWg.Done()
-
+func insertToDynamo(ctx context.Context, db *dynamodb.Client, insertChan <-chan *Record) error {
 	for record := range insertChan {
-		time.Sleep(1 * time.Millisecond) // simulate network latency
 		item, err := attributevalue.MarshalMap(record)
 		if err != nil {
 			return err

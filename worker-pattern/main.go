@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"sync"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
@@ -35,15 +36,26 @@ func main() {
 
 	fmt.Println("-------- Start migration --------")
 
-	var shardWaitGroup sync.WaitGroup
+	eg, egCtx := errgroup.WithContext(ctx)
+
 	for i := 1; i <= shardCount; i++ {
 		table := fmt.Sprintf("hashdb-%d", i)
 		fmt.Printf("%s is started!!\n", table)
-		shardWaitGroup.Add(1)
-		go migrateRecordsForShard(ctx, db, dynamoDB, table, querySize, &shardWaitGroup)
+
+		eg.Go(func() error {
+			if err := migration(egCtx, db, dynamoDB, table, querySize); err != nil {
+				return err
+			}
+
+			return nil
+		})
 	}
 
-	shardWaitGroup.Wait()
+	if err := eg.Wait(); err != nil {
+		log.Println(err)
+
+		return
+	}
 
 	fmt.Println("-------- Finish migration --------")
 	fmt.Printf("Migration took %s\n", time.Since(startTime))
