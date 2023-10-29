@@ -82,3 +82,9 @@ make bench/worker-pattern
 |----------------------|:------:|
 | MySQL logical shards |   6    |
 | Records per shard    | 10,000 |
+
+## References
+
+- [Migrating 80 Billion Records from mySQL to Bigtable](https://www.gophercon.com/agenda/session/1158499)
+- [[Go] benchstat/go tool traceコマンドをつかったベンチマークの可視化](https://budougumi0617.github.io/2020/12/04/goroutine_tuning_with_benchmark_benchstat_trace/)
+- [go tool traceでgoroutineの実行状況を可視化する](https://yuroyoro.hatenablog.com/entry/2017/12/11/192341)
