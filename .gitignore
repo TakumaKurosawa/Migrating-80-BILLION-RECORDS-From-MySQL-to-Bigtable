@@ -127,5 +127,6 @@ Temporary Items
 
 ### Benchmark test results ###
 *.out
+*.trace
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,jetbrains+all,dotenv
