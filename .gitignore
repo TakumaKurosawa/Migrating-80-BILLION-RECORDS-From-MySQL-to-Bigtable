@@ -125,4 +125,7 @@ Temporary Items
 # iCloud generated files
 *.icloud
 
+### Benchmark test results ###
+*.out
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,jetbrains+all,dotenv
